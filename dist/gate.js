@@ -61,7 +61,7 @@
     }
     let html = text('index.html').replace(/\b(src|poster|href)=(['"])(.*?)\2/g, (match, attribute, quote, reference) => urls[reference] ? `${attribute}=${quote}${urls[reference]}${quote}` : match);
     const safeMap = JSON.stringify(urls).replace(/</g, '\\u003c');
-    const bootstrap = `<script>window.__EGO23_ASSET_URLS__=${safeMap};document.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('.topbar nav');if(nav){const a=document.createElement('a');a.id='lock-page';a.href=location.pathname;a.textContent='退出访问';a.addEventListener('click',e=>{e.preventDefault();location.replace(location.pathname);});nav.append(a);}});<\/script>`;
+    const bootstrap = `<script>window.__EGO23_ASSET_URLS__=${safeMap};document.addEventListener('DOMContentLoaded',()=>{const nav=document.querySelector('.topbar nav');if(nav){const a=document.createElement('a');a.id='lock-page';a.href=location.pathname;a.textContent='退出访问';a.addEventListener('click',e=>{e.preventDefault();Object.values(window.__EGO23_ASSET_URLS__||{}).forEach(URL.revokeObjectURL);delete window.__EGO23_ASSET_URLS__;document.body.replaceChildren();location.replace(location.pathname);});nav.append(a);}});<\/script>`;
     html = html.replace('<head>', '<head>' + bootstrap);
     document.open(); document.write(html); document.close();
   }
