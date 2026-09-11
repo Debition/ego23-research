@@ -1,0 +1,44 @@
+name: Publish protected research homepage
+
+on:
+  push:
+    branches: [gh-pages]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require an encrypted publication
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, subprocess
+          from pathlib import Path
+          manifest=json.loads(Path('dist/vault.json').read_text())
+          assert manifest['format']=='ego23-vault-v1' and manifest['iterations']==600000
+          payload=Path('dist')/manifest['payload']
+          assert hashlib.sha256(payload.read_bytes()).hexdigest()==manifest['sha256']
+          allowed={'.github/workflows/pages.yml','.gitignore','README.md','dist/index.html','dist/gate.js','dist/gate.css','dist/vault.json','dist/.nojekyll',str(payload)}
+          tracked=set(subprocess.check_output(['git','ls-files','-z']).decode().strip('\0').split('\0'))
+          assert tracked==allowed, f'Unexpected files: {tracked ^ allowed}'
+          assert all(not Path(p).is_symlink() for p in tracked)
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

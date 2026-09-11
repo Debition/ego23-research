@@ -1,0 +1,10 @@
+.locked-export-*/
+export-report.json
+*.txt
+*.pdf
+*.ppt*
+*.mp4
+*.png
+*.jpg
+*.zip
+*.tar.gz
