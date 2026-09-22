@@ -1,8 +1,8 @@
 {
   "format": "ego23-vault-v1",
   "iterations": 600000,
-  "salt": "v4+J3RTbJASs267U/iPmeQ==",
-  "iv": "4QkKTW0Y9XWKYJ+X",
-  "payload": "content-9c66ea49b54bca5ca8d7.bin",
-  "sha256": "9c66ea49b54bca5ca8d7440ba656a765ecfa5e684bf92d83392ccee449af3414"
+  "salt": "/G8zlRuJW6b6nNN8S8f6Kw==",
+  "iv": "ewADO9d8DBFV3vuW",
+  "payload": "content-35ebd07c61a611d18bc6.bin",
+  "sha256": "35ebd07c61a611d18bc6f78d3f02b9ed35c27b4c184384e143e991fe2b3e40e4"
 }
