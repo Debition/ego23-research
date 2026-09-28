@@ -17,11 +17,30 @@
       const meta = await fetch('vault.json?build=' + encodeURIComponent(document.body.dataset.build), {cache:'no-store'});
       if (!meta.ok) throw new Error('无法读取页面，请稍后重试。');
       const manifest = await meta.json();
-      if (manifest.format !== 'ego23-vault-v1' || manifest.iterations !== 600000 || !/^content-[a-f0-9]{20}\.bin$/.test(manifest.payload)) throw new Error('页面版本不匹配，请刷新重试。');
-      const response = await fetch(manifest.payload);
-      if (!response.ok) throw new Error('内容下载失败，请重试。');
-      const encrypted = await response.arrayBuffer();
-      const digest = [...new Uint8Array(await crypto.subtle.digest('SHA-256', encrypted))].map(n=>n.toString(16).padStart(2,'0')).join('');
+      if (manifest.format !== 'ego23-vault-v1' || manifest.iterations !== 600000) throw new Error('页面版本不匹配，请刷新重试。');
+      const sha256 = async bytes => [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(n=>n.toString(16).padStart(2,'0')).join('');
+      let encrypted;
+      if (manifest.parts) {
+        const parts = manifest.parts;
+        if (!Array.isArray(parts) || !parts.length || parts.length > 128 || parts.some(p=>!/^content-[a-f0-9]{20}-[0-9]{3}\.bin$/.test(p.file) || !Number.isSafeInteger(p.bytes) || p.bytes<=0 || p.bytes>48*1024*1024)) throw new Error('页面分卷信息无效，请刷新重试。');
+        const merged = new Uint8Array(parts.reduce((sum,p)=>sum+p.bytes,0));
+        let offset = 0;
+        for (const [index, part] of parts.entries()) {
+          message(`正在载入内容 ${index + 1} / ${parts.length}…`);
+          const response = await fetch(part.file);
+          if (!response.ok) throw new Error('内容下载失败，请重试。');
+          const bytes = new Uint8Array(await response.arrayBuffer());
+          if (bytes.length !== part.bytes || await sha256(bytes) !== part.sha256) throw new Error('下载内容不完整，请刷新重试。');
+          merged.set(bytes, offset); offset += bytes.length;
+        }
+        encrypted = merged.buffer;
+      } else {
+        if (!/^content-[a-f0-9]{20}\.bin$/.test(manifest.payload)) throw new Error('页面版本不匹配，请刷新重试。');
+        const response = await fetch(manifest.payload);
+        if (!response.ok) throw new Error('内容下载失败，请重试。');
+        encrypted = await response.arrayBuffer();
+      }
+      const digest = await sha256(encrypted);
       if (digest !== manifest.sha256) throw new Error('下载内容不完整，请刷新重试。');
       return {manifest, encrypted};
     })().catch(error => { download = null; throw error; });

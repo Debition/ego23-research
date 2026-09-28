@@ -1,8 +1,29 @@
 {
   "format": "ego23-vault-v1",
   "iterations": 600000,
-  "salt": "eihstciwVUSA6ih2P9hBqQ==",
-  "iv": "gmBi54QuXJSTokf+",
-  "payload": "content-5a1ba1d6dbed7f1ad149.bin",
-  "sha256": "5a1ba1d6dbed7f1ad1493b4dd3c2d47188a23fc43ef504b47e9415dcb274e7d7"
+  "salt": "nZJcUnNNX7WJIl0mJDFJlA==",
+  "iv": "vPxuHiVFMoZMlJIk",
+  "sha256": "e643f32af6af37332ff5e01fe8e59854921734536c664cd31a4f8fbdf0007b82",
+  "parts": [
+    {
+      "file": "content-e643f32af6af37332ff5-000.bin",
+      "bytes": 50331648,
+      "sha256": "26301f156b1d6c980bf641e40d6d87493ab37cf2bfd0582c6529052918637cff"
+    },
+    {
+      "file": "content-e643f32af6af37332ff5-001.bin",
+      "bytes": 50331648,
+      "sha256": "a7996a252501bd52e718611bed2ed75625695f696f347990104d4de0623d525a"
+    },
+    {
+      "file": "content-e643f32af6af37332ff5-002.bin",
+      "bytes": 50331648,
+      "sha256": "c22d7f1e60d08f5f927c7fc4c8e00438fc78ea6360b806525325c0406ebc12f4"
+    },
+    {
+      "file": "content-e643f32af6af37332ff5-003.bin",
+      "bytes": 1807981,
+      "sha256": "fbe24a343215c62f8444cf88c38cf502ef2baf2601919208bbe000f82dc3c361"
+    }
+  ]
 }
