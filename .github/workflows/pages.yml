@@ -29,9 +29,22 @@ jobs:
           from pathlib import Path
           manifest=json.loads(Path('dist/vault.json').read_text())
           assert manifest['format']=='ego23-vault-v1' and manifest['iterations']==600000
-          payload=Path('dist')/manifest['payload']
-          assert hashlib.sha256(payload.read_bytes()).hexdigest()==manifest['sha256']
-          allowed={'.github/workflows/pages.yml','.gitignore','README.md','dist/index.html','dist/gate.js','dist/gate.css','dist/vault.json','dist/.nojekyll',str(payload)}
+          entries=manifest.get('parts') or [{'file':manifest['payload']}]
+          digest=hashlib.sha256()
+          payloads=set()
+          for entry in entries:
+              name=entry['file']
+              assert Path(name).name==name and name.startswith('content-') and name.endswith('.bin')
+              payload=Path('dist')/name
+              assert str(payload) not in payloads
+              payloads.add(str(payload))
+              data=payload.read_bytes()
+              if 'parts' in manifest:
+                  assert len(data)==entry['bytes'] and len(data)<=48*1024*1024
+                  assert hashlib.sha256(data).hexdigest()==entry['sha256']
+              digest.update(data)
+          assert digest.hexdigest()==manifest['sha256']
+          allowed={'.github/workflows/pages.yml','.gitignore','README.md','dist/index.html','dist/gate.js','dist/gate.css','dist/vault.json','dist/.nojekyll'}|payloads
           tracked=set(subprocess.check_output(['git','ls-files','-z']).decode().strip('\0').split('\0'))
           assert tracked==allowed, f'Unexpected files: {tracked ^ allowed}'
           assert all(not Path(p).is_symlink() for p in tracked)
